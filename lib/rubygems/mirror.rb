@@ -47,11 +47,19 @@ class Gem::Mirror
       gems += Marshal.load(File.read(to(sf)))
     end
 
-    gems.map! do |name, ver, plat|
+    latest_gems = []
+    gems_by_name = gems.group_by {|name,version| name }
+    gems_by_name.each {|name, list|
+      list = list.sort_by {|name,version| version }
+      latest_gems << list.pop
+    }
+
+    latest_gems.map! do |name, ver, plat|
       # If the platform is ruby, it is not in the gem name
       "#{name}-#{ver}#{"-#{plat}" unless plat == RUBY}.gem"
     end
-    gems
+
+    latest_gems
   end
 
   def existing_gems
